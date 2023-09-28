@@ -42,11 +42,18 @@ export function getServerErrorFromUnknown(cause: unknown): HttpError {
     });
   }
 
+  if (cause instanceof NotFoundError) {
+    if (cause.message === "eventType.notFound") {
+      return new HttpError({
+        statusCode: 400,
+        message: "Invalid eventTypeId",
+      });
+    }
+    return getHttpError({ statusCode: 404, cause });
+  }
+
   if (cause instanceof PrismaClientKnownRequestError) {
     return getHttpError({ statusCode: 400, cause });
-  }
-  if (cause instanceof NotFoundError) {
-    return getHttpError({ statusCode: 404, cause });
   }
   if (cause instanceof Stripe.errors.StripeInvalidRequestError) {
     return getHttpError({ statusCode: 400, cause });

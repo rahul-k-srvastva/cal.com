@@ -647,10 +647,17 @@ async function handler(
   });
 
   // handle dynamic user
-  let eventType =
-    !req.body.eventTypeId && !!req.body.eventTypeSlug
-      ? getDefaultEvent(req.body.eventTypeSlug)
-      : await getEventTypesFromDB(req.body.eventTypeId);
+  let eventType = null;
+
+  try {
+    eventType =
+      !req.body.eventTypeId && !!req.body.eventTypeSlug
+        ? getDefaultEvent(req.body.eventTypeSlug)
+        : await getEventTypesFromDB(req.body.eventTypeId);
+  } catch (error: NotFoundError) {
+    error.message = "eventType.notFound";
+    throw error;
+  }
 
   eventType = {
     ...eventType,
